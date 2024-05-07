@@ -1,26 +1,32 @@
+using CloudLiquid;
+using CloudLiquid.ContentFactory;
+using CloudLiquid.ObjectModel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using CloudLiquid;
-using CloudLiquid.ContentFactory;
 using System.Net;
-using System.Security.Policy;
-using Grpc.Core;
 
 namespace Azure.Liquid
 {
     public class Liquid
     {
+        #region Private Members
         private readonly ILogger<Liquid> _logger;
         private Cache<string, string> _cache;
+
+        CloudLiquid.CloudLiquid cloudLiquid;
+
+        #endregion
 
         public Liquid(ILogger<Liquid> logger)
         {
             _logger = logger;
             _cache = new Cache<string, string>();
-            CloudLiquid.Liquid.log = logger;
-            CloudLiquid.Liquid.FileSystem = Storage.Client;
+            //CloudLiquid.Liquid.log = logger;
+            //CloudLiquid.Liquid.FileSystem = Storage.Client;
+
+            cloudLiquid = new CloudLiquid.CloudLiquid(logger, Storage.Client);
         }
 
         [Function("CloudLiquid")]
@@ -66,6 +72,7 @@ namespace Azure.Liquid
                     StatusCode = (int)HttpStatusCode.BadRequest
                 };
             }
+
             try{
              contentBody = await contentStream;
             }
@@ -80,6 +87,7 @@ namespace Azure.Liquid
                     StatusCode = (int)HttpStatusCode.BadRequest
                 };
             }
+
             DotLiquid.Hash inputHash;
             _logger.LogInformation("Content:"+contentBody);
             try
@@ -102,11 +110,24 @@ namespace Azure.Liquid
             _logger.LogInformation(contentBody);
             try
             {
-                output = CloudLiquid.Liquid.Run(inputHash, inputBlob);
+                //output = CloudLiquid.Liquid.Run(inputHash, inputBlob);
+                RunResult result = cloudLiquid.Run(inputHash, inputBlob);
+
+                if (!result.Success)
+                {
+                    var error = new CloudError(result.ErrorMessage, "CloudLiquid", result.ErrorAction, HttpStatusCode.InternalServerError, null).FormatMessage(outContentType);
+                    _logger.LogError(error);
+                    return new ContentResult()
+                    {
+                        Content = error,
+                        ContentType = outContentType,
+                        StatusCode = (int)HttpStatusCode.InternalServerError
+                    };
+                }
             }
             catch (Exception ex)
             {
-                var error = new CloudError(CloudLiquid.Liquid.message, "CloudLiquid", CloudLiquid.Liquid.action, HttpStatusCode.InternalServerError, ex.Message).FormatMessage(outContentType);
+                var error = new CloudError($"Error while running template: {ex.Message}", "CloudLiquid", "RunTemplate", HttpStatusCode.InternalServerError, ex.Message).FormatMessage(outContentType);
                 _logger.LogError(error);
                 return new ContentResult()
                 {
@@ -138,6 +159,3 @@ namespace Azure.Liquid
         }
     }
 }
-
-
-
