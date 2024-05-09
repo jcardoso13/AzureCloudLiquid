@@ -1,0 +1,9 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=True",
+    "StorageAccountConnectionString": "UseDevelopmentStorage=True",
+    "ContainerName": "liquid",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
+  }
+}
