@@ -15,7 +15,7 @@ __azurite_db_queue_extent__.json
 __azurite_db_table__.json
 __blobstorage__/
 __queuestorage__/
-.vscode/
+
 .mono/
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -79,6 +79,8 @@ artifacts/
 *.pidb
 *.svclog
 *.scc
+
+.vscode/
 
 # Chutzpah Test files
 _Chutzpah*
