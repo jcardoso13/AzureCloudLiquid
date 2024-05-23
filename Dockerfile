@@ -7,6 +7,13 @@ ENV FUNCTIONS_WORKER_RUNTIME = "dotnet-isolated"
 
 
 
+ENV AzureWebJobsStorage = $AzureWebJobsStorage
+ENV StorageAccountName  = $StorageAccountName
+ENV ContainerName = $ContainerName
+ENV FUNCTIONS_WORKER_RUNTIME = "dotnet-isolated"
+
+
+
 COPY . /src/dotnet-function-app
 RUN cd /src/dotnet-function-app && \
 mkdir -p /home/site/wwwroot && \
