@@ -15,8 +15,8 @@
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.17.2"/>
     <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0"/>
     <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="1.2.0"/>
-    <!-- <PackageReference Include="CloudLiquid" Version="1.1.0"/> -->
-      <ProjectReference Include="..\CloudLiquid\CloudLiquid.csproj" />
+    <PackageReference Include="CloudLiquid" Version="1.1.0"/>
+      <!-- <ProjectReference Include="..\CloudLiquid\CloudLiquid.csproj" /> -->
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
