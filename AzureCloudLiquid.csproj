@@ -9,20 +9,16 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.20.0" />
+    <PackageReference Include="CloudLiquid" Version="1.0.92" />
     <PackageReference Include="DotLiquid" Version="2.2.692" />
     <!-- <None Include="local.settings.json"/> -->
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.22.0" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="1.2.1" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.2.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="1.3.2" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.17.2" />
     <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="1.2.0" />
     <!-- <PackageReference Include="CloudLiquid" Version="1.1.0"/> -->
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="CloudLiquid">
-      <HintPath>..\cloud-liquid-framework\bin\Debug\net8.0\CloudLiquid.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
