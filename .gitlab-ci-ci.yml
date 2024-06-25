@@ -24,11 +24,35 @@ cache:
 
 fetch_package_name:
   stage: fetch_package_name
-  image: appropriate/curl:latest
+  image: mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION
   script:
-    - >
-      PACKAGE_NAME=$(curl "$NUGET_REGISTRY_URL" |
-      jq -r '.[0].name')
+    - dotnet new console -o FetchPackageName
+    - cd FetchPackageName
+    - echo 'using System;' > Program.cs
+    - echo 'using System.Net.Http;' >> Program.cs
+    - echo 'using System.Threading.Tasks;' >> Program.cs
+    - echo 'using Newtonsoft.Json.Linq;' >> Program.cs
+    - echo 'namespace FetchPackageName' >> Program.cs
+    - echo '{' >> Program.cs
+    - echo 'class Program' >> Program.cs
+    - echo '{' >> Program.cs
+    - echo 'static async Task Main(string[] args)' >> Program.cs
+    - echo '{' >> Program.cs
+    - echo 'var token = Environment.GetEnvironmentVariable("CI_JOB_TOKEN");' >> Program.cs
+    - echo 'var registryUrl = Environment.GetEnvironmentVariable("NUGET_REGISTRY_URL");' >> Program.cs
+    - echo 'using var client = new HttpClient();' >> Program.cs
+    - echo 'client.DefaultRequestHeaders.Add("PRIVATE-TOKEN", token);' >> Program.cs
+    - echo 'var response = await client.GetStringAsync(registryUrl);' >> Program.cs
+    - echo 'var packages = JArray.Parse(response);' >> Program.cs
+    - echo 'var latestPackageName = packages[0]["name"].ToString();' >> Program.cs
+    - echo 'Console.WriteLine(latestPackageName);' >> Program.cs
+    - echo '}' >> Program.cs
+    - echo '}' >> Program.cs
+    - echo '}' >> Program.cs
+    - dotnet add package Newtonsoft.Json
+    - dotnet run > ../package_name.txt
+    - cd ..
+    - PACKAGE_NAME=$(cat package_name.txt | tail -n 1)
     - echo "PACKAGE_NAME=${PACKAGE_NAME}" > package_name.env
   artifacts:
     reports:
