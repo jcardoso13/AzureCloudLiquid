@@ -24,9 +24,7 @@ cache:
 
 fetch_package_name:
   stage: fetch_package_name
-  image: curlimages/curl:latest
-  before_script:
-    - apk add --no-cache jq
+  image: appropriate/curl:latest
   script:
     - >
       PACKAGE_NAME=$(curl "$NUGET_REGISTRY_URL" |
