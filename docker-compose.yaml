@@ -25,7 +25,7 @@ services:
             # Copy .env variables through to container
             - AzureWebJobsStorage
             - ContainerName
-            - StorageAccountName
+            - StorageAccountConnectionString
         depends_on:
             - local.storage.emulator
         networks:

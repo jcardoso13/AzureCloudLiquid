@@ -1,14 +1,14 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0.300 AS installer-env
 
 ENV AzureWebJobsStorage = $AzureWebJobsStorage
-ENV StorageAccountName  = $StorageAccountName
+ENV StorageAccountConnectionString  = $StorageAccountConnectionString
 ENV ContainerName = $ContainerName
 ENV FUNCTIONS_WORKER_RUNTIME = "dotnet-isolated"
 
 
 
 ENV AzureWebJobsStorage = $AzureWebJobsStorage
-ENV StorageAccountName  = $StorageAccountName
+ENV StorageAccountConnectionString  = $StorageAccountConnectionString
 ENV ContainerName = $ContainerName
 ENV FUNCTIONS_WORKER_RUNTIME = "dotnet-isolated"
 

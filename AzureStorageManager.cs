@@ -11,6 +11,7 @@ namespace CloudLiquid.Azure
         private readonly ILogger logger = logger;
 
         #endregion
+
         #region Constructors
 
         #endregion
