@@ -1,0 +1,79 @@
+
+stages:
+  - fetch_package_name
+  - restore
+  - build
+  - docker_build
+
+
+variables:
+  NUGET_REGISTRY_URL: "https://umane.emeal.nttdata.com/git/api/v4/projects/34206/packages/nuget/index.json"
+  NUGET_AUTH_TOKEN: "$GITLAB_TOKEN"
+  NUGET_PACKAGES: "$CI_PROJECT_DIR/.nuget/packages"
+  DOTNET_VERSION: latest
+  REGISTRY_SOURCE: "acrcloudliquid.azurecr.io"
+  AZURE_CONTAINER_REGISTRY_USERNAME: "$ACR_USERNAME"
+  AZURE_CONTAINER_REGISTRY_PASSWORD: "$ACR_PASSWORD"
+
+
+
+cache:
+  paths:
+    - .nuget/packages/
+
+
+fetch_package_name:
+  stage: fetch_package_name
+  image: curlimages/curl:latest
+  script:
+    - >
+      PACKAGE_NAME=$(curl --header "PRIVATE-TOKEN: $NUGET_AUTH_TOKEN" "$NUGET_REGISTRY_URL" |
+      jq -r '.[0].name')
+    - echo "PACKAGE_NAME=${PACKAGE_NAME}" > package_name.env
+  artifacts:
+    reports:
+      dotenv: package_name.env
+
+
+restore:
+  stage: restore
+  image: mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION
+  script:
+    - dotnet nuget add source "$NUGET_REGISTRY_URL" -n gitlab -u $GITLAB_USERNAME -p $NUGET_AUTH_TOKEN --store-password-in-clear-text
+    - dotnet restore
+  dependencies:
+    - fetch_package_name
+  artifacts:
+    paths:
+      - .nuget/packages/
+
+
+build:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION
+  script:
+    - dotnet build --configuration Release --no-restore
+  dependencies:
+    - restore
+  artifacts:
+    paths:
+      - bin/
+      - obj/
+
+
+docker_build:
+  stage: docker_build
+  image: docker:latest
+  services:
+    - name: docker:dind
+      alias: docker
+  script:
+    - source package_name.env
+    - export DOCKER_IMAGE="${REGISTRY_SOURCE}/${PACKAGE_NAME}:latest"
+    - docker build -t $DOCKER_IMAGE .
+    - docker tag $DOCKER_IMAGE $REGISTRY_SOURCE/$DOCKER_IMAGE:latest
+  dependencies:
+    - fetch_package_name
+    - build
+  
+

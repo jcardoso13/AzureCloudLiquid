@@ -1,0 +1,20 @@
+
+stages:
+  - fetch_package_name
+  - restore
+  - build
+  - docker_build
+  - publish
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
+
+include:
+  - local: '/.gitlab-ci-ci.yml'
+  - local: '/.gitlab-ci-cd.yml'
+
+

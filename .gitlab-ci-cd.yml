@@ -1,0 +1,33 @@
+
+stages:
+  - publish
+
+variables:
+  NUGET_REGISTRY_URL: "https://umane.emeal.nttdata.com/git/api/v4/projects/34206/packages/nuget/index.json"
+  REGISTRY_SOURCE: "acrcloudliquid.azurecr.io"
+  AZURE_CONTAINER_REGISTRY_USERNAME: "$ACR_USERNAME"
+  AZURE_CONTAINER_REGISTRY_PASSWORD: "$ACR_PASSWORD"
+
+cache:
+  paths:
+    - .nuget/packages/
+
+
+publish:
+  stage: publish
+  image: docker:latest
+  script:
+    - source package_name.env
+    - export DOCKER_IMAGE="${REGISTRY_SOURCE}/${PACKAGE_NAME}:latest"
+    - echo "docker registry login"
+    - echo "$AZURE_CONTAINER_REGISTRY_PASSWORD" | docker login $REGISTRY_SOURCE --username $AZURE_CONTAINER_REGISTRY_USERNAME --password-stdin
+    - echo "pushing image to registry"
+    - docker push $REGISTRY_SOURCE/$DOCKER_IMAGE:latest
+    - echo "image successfully pushed to registry"
+  needs:
+    - job: docker_build
+      artifacts: true
+    - job: fetch_package_name
+      artifacts: true
+  only:
+    - main
