@@ -27,7 +27,7 @@ fetch_package_name:
   image: curlimages/curl:latest
   script:
     - >
-      PACKAGE_NAME=$(curl --header "PRIVATE-TOKEN: $NUGET_AUTH_TOKEN" "$NUGET_REGISTRY_URL" |
+      PACKAGE_NAME=$(curl --header "$NUGET_REGISTRY_URL" |
       jq -r '.[0].name')
     - echo "PACKAGE_NAME=${PACKAGE_NAME}" > package_name.env
   artifacts:
