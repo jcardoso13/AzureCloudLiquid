@@ -16,7 +16,7 @@ cache:
 
 publish:
   stage: publish
-  image: docker:latest
+  image: docker:20.10.16
   script:
     - echo "docker registry login"
     - echo "$AZURE_CONTAINER_REGISTRY_PASSWORD" | docker login $REGISTRY_SOURCE --username $AZURE_CONTAINER_REGISTRY_USERNAME --password-stdin

@@ -13,6 +13,7 @@ variables:
   REGISTRY_SOURCE: "acrcloudliquid.azurecr.io"
   AZURE_CONTAINER_REGISTRY_USERNAME: "$ACR_USERNAME"
   AZURE_CONTAINER_REGISTRY_PASSWORD: "$ACR_PASSWORD"
+  DOCKER_DRIVER: overlay2
 
 
 
@@ -44,12 +45,20 @@ build:
 
 docker_build:
   stage: docker_build
-  image: docker:latest
+  image: docker:20.10.16
   services:
-    - name: docker:dind
+    - name: docker:20.10.16-dind
+      alias: docker
+  variables:
+    DOCKER_BUILDKIT: 1
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker info
   script:
+    - docker buildx create --use
+    - docker buildx inspect --bootstrap
     - echo "start building docker image"
-    - docker build -t $DOCKER_IMAGE:latest -t $DOCKER_IMAGE:${CI_PIPELINE_ID} .
+    - docker buildx build -t $DOCKER_IMAGE:latest -t $DOCKER_IMAGE:${CI_PIPELINE_ID} .
     - echo "image created successfully"
   dependencies:
     - build
