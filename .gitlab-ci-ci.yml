@@ -24,10 +24,11 @@ cache:
 
 fetch_package_name:
   stage: fetch_package_name
-  image: mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION
+  image: mcr.microsoft.com/dotnet/sdk:6.0
   script:
-    - dotnet new console -o FetchPackageName
+    - mkdir FetchPackageName
     - cd FetchPackageName
+    - dotnet new console
     - echo 'using System;' > Program.cs
     - echo 'using System.Net.Http;' >> Program.cs
     - echo 'using System.Threading.Tasks;' >> Program.cs
@@ -43,8 +44,8 @@ fetch_package_name:
     - echo 'using var client = new HttpClient();' >> Program.cs
     - echo 'client.DefaultRequestHeaders.Add("PRIVATE-TOKEN", token);' >> Program.cs
     - echo 'var response = await client.GetStringAsync(registryUrl);' >> Program.cs
-    - echo 'var packages = JArray.Parse(response);' >> Program.cs
-    - echo 'var latestPackageName = packages[0]["name"].ToString();' >> Program.cs
+    - echo 'var json = JObject.Parse(response);' >> Program.cs
+    - echo 'var latestPackageName = json["packages"][0]["name"].ToString();' >> Program.cs
     - echo 'Console.WriteLine(latestPackageName);' >> Program.cs
     - echo '}' >> Program.cs
     - echo '}' >> Program.cs
@@ -93,7 +94,7 @@ docker_build:
       alias: docker
   script:
     - source package_name.env
-    - export DOCKER_IMAGE="${REGISTRY_SOURCE}/${PACKAGE_NAME}:latest"
+    - export DOCKER_IMAGE="${AZURE_CONTAINER_REGISTRY_URL}/${PACKAGE_NAME}:latest"
     - docker build -t $DOCKER_IMAGE .
     - docker tag $DOCKER_IMAGE $REGISTRY_SOURCE/$DOCKER_IMAGE:latest
   dependencies:
