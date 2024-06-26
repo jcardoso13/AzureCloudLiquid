@@ -47,10 +47,9 @@ docker_build:
   image: docker:latest
   services:
     - name: docker:dind
-      alias: docker
   script:
     - echo "start building docker image"
-    - docker build -t $DOCKER_IMAGE:latest $DOCKER_IMAGE:$CI_PIPELINE_ID .
+    - docker build -f Dockerfile -t $DOCKER_IMAGE:latest $DOCKER_IMAGE:$CI_PIPELINE_ID .
     - echo "image created successfully"
   dependencies:
     - build
