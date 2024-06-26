@@ -1,6 +1,5 @@
 
 stages:
-  - restore
   - build
   - docker_build
   - publish
