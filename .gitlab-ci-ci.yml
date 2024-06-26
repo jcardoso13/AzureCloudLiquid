@@ -49,7 +49,7 @@ docker_build:
     - name: docker:dind
   script:
     - echo "start building docker image"
-    - docker build -f Dockerfile -t $DOCKER_IMAGE:latest $DOCKER_IMAGE:$CI_PIPELINE_ID .
+    - docker buildx build -t $DOCKER_IMAGE:latest $DOCKER_IMAGE:${CI_PIPELINE_ID} .
     - echo "image created successfully"
   dependencies:
     - build
