@@ -1,6 +1,5 @@
 
 stages:
-  - fetch_package_name
   - restore
   - build
   - docker_build
@@ -11,6 +10,7 @@ variables:
   NUGET_AUTH_TOKEN: "$GITLAB_TOKEN"
   NUGET_PACKAGES: "$CI_PROJECT_DIR/.nuget/packages"
   DOTNET_VERSION: latest
+  DOCKER_IMAGE: "$REGISTRY_SOURCE/cloudliquid"
   REGISTRY_SOURCE: "acrcloudliquid.azurecr.io"
   AZURE_CONTAINER_REGISTRY_USERNAME: "$ACR_USERNAME"
   AZURE_CONTAINER_REGISTRY_PASSWORD: "$ACR_PASSWORD"
@@ -20,44 +20,6 @@ variables:
 cache:
   paths:
     - .nuget/packages/
-
-
-fetch_package_name:
-  stage: fetch_package_name
-  image: mcr.microsoft.com/dotnet/sdk:6.0
-  script:
-    - mkdir FetchPackageName
-    - cd FetchPackageName
-    - dotnet new console
-    - echo 'using System;' > Program.cs
-    - echo 'using System.Net.Http;' >> Program.cs
-    - echo 'using System.Threading.Tasks;' >> Program.cs
-    - echo 'using Newtonsoft.Json.Linq;' >> Program.cs
-    - echo 'namespace FetchPackageName' >> Program.cs
-    - echo '{' >> Program.cs
-    - echo 'class Program' >> Program.cs
-    - echo '{' >> Program.cs
-    - echo 'static async Task Main(string[] args)' >> Program.cs
-    - echo '{' >> Program.cs
-    - echo 'var token = Environment.GetEnvironmentVariable("CI_JOB_TOKEN");' >> Program.cs
-    - echo 'var registryUrl = Environment.GetEnvironmentVariable("NUGET_REGISTRY_URL");' >> Program.cs
-    - echo 'using var client = new HttpClient();' >> Program.cs
-    - echo 'client.DefaultRequestHeaders.Add("PRIVATE-TOKEN", token);' >> Program.cs
-    - echo 'var response = await client.GetStringAsync(registryUrl);' >> Program.cs
-    - echo 'var json = JObject.Parse(response);' >> Program.cs
-    - echo 'var latestPackageName = json["packages"][0]["name"].ToString();' >> Program.cs
-    - echo 'Console.WriteLine(latestPackageName);' >> Program.cs
-    - echo '}' >> Program.cs
-    - echo '}' >> Program.cs
-    - echo '}' >> Program.cs
-    - dotnet add package Newtonsoft.Json
-    - dotnet run > ../package_name.txt
-    - cd ..
-    - PACKAGE_NAME=$(cat package_name.txt | tail -n 1)
-    - echo "PACKAGE_NAME=${PACKAGE_NAME}" > package_name.env
-  artifacts:
-    reports:
-      dotenv: package_name.env
 
 
 restore:
@@ -93,10 +55,9 @@ docker_build:
     - name: docker:dind
       alias: docker
   script:
-    - source package_name.env
-    - export DOCKER_IMAGE="${AZURE_CONTAINER_REGISTRY_URL}/${PACKAGE_NAME}:latest"
-    - docker build -t $DOCKER_IMAGE .
-    - docker tag $DOCKER_IMAGE $REGISTRY_SOURCE/$DOCKER_IMAGE:latest
+    - echo "start building docker image"
+    - docker build -t $DOCKER_IMAGE:latest $DOCKER_IMAGE:$CI_PIPELINE_ID .
+    - echo "image created successfully"
   dependencies:
     - fetch_package_name
     - build

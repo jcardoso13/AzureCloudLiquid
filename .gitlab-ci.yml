@@ -1,6 +1,5 @@
 
 stages:
-  - fetch_package_name
   - restore
   - build
   - docker_build
