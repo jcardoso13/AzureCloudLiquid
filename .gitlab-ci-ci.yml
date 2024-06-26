@@ -17,26 +17,25 @@ variables:
 
 
 
-cache:
-  paths:
-    - .nuget/packages/
+#cache:
+#  paths:
+#    - .nuget/packages/
 
 
-restore:
-  stage: restore
-  image: mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION
-  script:
-    - dotnet nuget add source "$NUGET_REGISTRY_URL" -n gitlab -u $GITLAB_USERNAME -p $NUGET_AUTH_TOKEN --store-password-in-clear-text
-    - dotnet restore
-  artifacts:
-    paths:
-      - .nuget/packages/
+#restore:
+#  stage: restore
+#  image: mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION
+#  script:
+#    - dotnet nuget add source "$NUGET_REGISTRY_URL" -n gitlab -u $GITLAB_USERNAME -p $NUGET_AUTH_TOKEN --store-password-in-clear-text
+#    - dotnet restore
 
 
 build:
   stage: build
   image: mcr.microsoft.com/dotnet/sdk:$DOTNET_VERSION
   script:
+    - dotnet nuget add source "$NUGET_REGISTRY_URL" -n gitlab -u $GITLAB_USERNAME -p $NUGET_AUTH_TOKEN --store-password-in-clear-text
+    - dotnet restore
     - dotnet build --configuration Release --no-restore
   dependencies:
     - restore
