@@ -8,8 +8,8 @@ variables:
   NUGET_AUTH_TOKEN: "$GITLAB_TOKEN"
   NUGET_PACKAGES: "$CI_PROJECT_DIR/.nuget/packages"
   DOTNET_VERSION: latest
-  DOCKER_IMAGE: "$REGISTRY_SOURCE/cloudliquid"
   REGISTRY_SOURCE: "acrcloudliquid.azurecr.io"
+  DOCKER_IMAGE: "$REGISTRY_SOURCE/cloudliquid"
   AZURE_CONTAINER_REGISTRY_USERNAME: "$ACR_USERNAME"
   AZURE_CONTAINER_REGISTRY_PASSWORD: "$ACR_PASSWORD"
   DOCKER_DRIVER: overlay2
@@ -56,6 +56,7 @@ docker_build:
   script:
     - echo "start building docker image"
     - docker build -f Dockerfile -t $DOCKER_IMAGE:latest -t $DOCKER_IMAGE:${CI_PIPELINE_ID} .
+    - ls -la
     - echo "image created successfully"
   artifacts:
     paths:

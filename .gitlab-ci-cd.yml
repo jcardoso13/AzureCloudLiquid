@@ -29,9 +29,11 @@ publish:
     - echo "docker registry login"
     - echo "$AZURE_CONTAINER_REGISTRY_PASSWORD" | docker login $REGISTRY_SOURCE --username $AZURE_CONTAINER_REGISTRY_USERNAME --password-stdin
     - echo "pushing image to registry"
+    - ls -la
     - docker push $DOCKER_IMAGE:latest
     - docker push $DOCKER_IMAGE:$CI_PIPELINE_ID
     - echo "image successfully pushed to registry"
+  when: manual
   needs:
     - job: docker_build
       artifacts: true
