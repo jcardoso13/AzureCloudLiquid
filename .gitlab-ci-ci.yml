@@ -57,7 +57,10 @@ docker_build:
     - echo "start building docker image"
     - docker build -f Dockerfile -t $DOCKER_IMAGE:latest -t $DOCKER_IMAGE:${CI_PIPELINE_ID} .
     - echo "image created successfully"
-  dependencies:
-    - build
+  artifacts:
+    paths:
+      - bin/
+      - obj/
+    expire_in: 1 hour 
   
 
