@@ -47,8 +47,8 @@ docker_build:
     - name: docker:24.0.5-dind
       alias: dockerhost
   variables:
-    DOCKER_HOST: tcp://localhost:2375/
-    DOCKER_TLS_VERIFY: 1
+    DOCKER_HOST: tcp://dockerhost:2375/
+#    DOCKER_TLS_VERIFY: 1
     DOCKER_TLS_CERTDIR: ""
 
   before_script:
