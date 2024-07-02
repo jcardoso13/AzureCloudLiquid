@@ -13,8 +13,10 @@ variables:
   AZURE_CONTAINER_REGISTRY_USERNAME: "$ACR_USERNAME"
   AZURE_CONTAINER_REGISTRY_PASSWORD: "$ACR_PASSWORD"
   DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: ""
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_TLS_VERIFY: 1
   DOCKER_BUILDKIT: 1
+  DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
 
 
 
@@ -46,14 +48,15 @@ build:
 
 docker_build:
   stage: docker_build
-  image: docker:20.10.16
+  image: docker:24.0.5
   services:
-    - name: docker:20.10.16-dind
+    - name: docker:24.0.5-dind
       alias: docker
   variables:
-#    DOCKER_HOST: tcp://docker:2375
-#    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2376
     DOCKER_BUILDKIT: 1
+  before_script:
+    - docker info
   script:
     - echo "start building docker image"
     - docker build -f Dockerfile -t $DOCKER_IMAGE:latest -t $DOCKER_IMAGE:${CI_PIPELINE_ID} .
