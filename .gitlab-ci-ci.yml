@@ -13,10 +13,7 @@ variables:
   AZURE_CONTAINER_REGISTRY_USERNAME: "$ACR_USERNAME"
   AZURE_CONTAINER_REGISTRY_PASSWORD: "$ACR_PASSWORD"
   DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: "/certs"
-  DOCKER_TLS_VERIFY: 1
-  DOCKER_BUILDKIT: 1
-  DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+  
 
 
 
@@ -54,7 +51,9 @@ docker_build:
       alias: docker
   variables:
     DOCKER_HOST: tcp://docker:2376
-    DOCKER_BUILDKIT: 1
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
   before_script:
     - until docker info; do sleep 1; done
   script:
