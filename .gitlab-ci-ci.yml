@@ -51,9 +51,8 @@ docker_build:
       alias: docker
   variables:
     DOCKER_HOST: tcp://localhost:2375
-#    DOCKER_TLS_VERIFY: 1
-    DOCKER_TLS_CERTDIR: "/certs"
-    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_TLS_CERTDIR: ""
   before_script:
     - until docker info; do sleep 1; done
   script:
