@@ -56,7 +56,7 @@ docker_build:
     DOCKER_HOST: tcp://docker:2376
     DOCKER_BUILDKIT: 1
   before_script:
-    - docker info
+    - until docker info; do sleep 1; done
   script:
     - echo "start building docker image"
     - docker build -f Dockerfile -t $DOCKER_IMAGE:latest -t $DOCKER_IMAGE:${CI_PIPELINE_ID} .
