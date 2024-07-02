@@ -8,15 +8,23 @@ variables:
   DOCKER_IMAGE: "$REGISTRY_SOURCE/cloudliquid"
   AZURE_CONTAINER_REGISTRY_USERNAME: "$ACR_USERNAME"
   AZURE_CONTAINER_REGISTRY_PASSWORD: "$ACR_PASSWORD"
+  DOCKER_DRIVER: overlay2
 
-cache:
-  paths:
-    - .nuget/packages/
+#cache:
+#  paths:
+#    - .nuget/packages/
 
 
 publish:
   stage: publish
   image: docker:24.0.5
+  services:
+    - name: docker:24.0.5-dind
+      alias: dockerhost
+  variables:
+    DOCKER_HOST: tcp://dockerhost:2375/
+#    DOCKER_TLS_VERIFY: 1
+    DOCKER_TLS_CERTDIR: ""
   script:
     - echo "docker registry login"
     - echo "$AZURE_CONTAINER_REGISTRY_PASSWORD" | docker login $REGISTRY_SOURCE --username $AZURE_CONTAINER_REGISTRY_USERNAME --password-stdin
