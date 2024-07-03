@@ -56,14 +56,19 @@ docker_build:
     - until docker info; do sleep 1; done
   script:
     - echo "start building docker image"
-    - docker build -f Dockerfile --compress -o type=tar,dest=out.tar -t $DOCKER_IMAGE:latest -t $DOCKER_IMAGE:${CI_PIPELINE_ID} .
+    - docker build -f Dockerfile -t $DOCKER_IMAGE:latest -t $DOCKER_IMAGE:${CI_PIPELINE_ID} .
+    - touch docker_image_info.txt
+    - echo $DOCKER_IMAGE:latest > docker_image_info.txt
+    - echo $DOCKER_IMAGE:${CI_PIPELINE_ID} >> docker_image_info.txt
+    - cat docker_image_info.txt
     - ls -la
     - echo "image created successfully"
   dependencies:
     - build
   artifacts:
     paths:
-      - out.tar
+      - docker_image_info.txt
+
   
 
 publish:
@@ -77,10 +82,13 @@ publish:
 #    DOCKER_TLS_VERIFY: 1
     DOCKER_TLS_CERTDIR: ""
   script:
+    - cat docker_image_info.txt
+    - echo "start building docker image"
+    - docker build -f Dockerfile -t $DOCKER_IMAGE:latest -t $DOCKER_IMAGE:${CI_PIPELINE_ID} .
+    - echo "image created successfully"
     - echo "docker registry login"
     - echo "$AZURE_CONTAINER_REGISTRY_PASSWORD" | docker login $REGISTRY_SOURCE --username $AZURE_CONTAINER_REGISTRY_USERNAME --password-stdin
     - echo "pushing image to registry"
-    - ls -la
     - docker push $DOCKER_IMAGE:latest
     - docker push $DOCKER_IMAGE:$CI_PIPELINE_ID
     - echo "image successfully pushed to registry"
