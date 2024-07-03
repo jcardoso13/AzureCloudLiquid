@@ -56,15 +56,11 @@ docker_build:
     - until docker info; do sleep 1; done
   script:
     - echo "start building docker image"
-    - docker build -f Dockerfile -t $DOCKER_IMAGE:latest -t $DOCKER_IMAGE:${CI_PIPELINE_ID} --output docker_image .
+    - docker build -f Dockerfile -t $DOCKER_IMAGE:latest -t $DOCKER_IMAGE:${CI_PIPELINE_ID} .
     - ls -la
     - echo "image created successfully"
   dependencies:
     - build
-  artifacts:
-    paths:
-      - docker_image/
-    expire_in: 1 hour 
   
 
 publish:
