@@ -56,14 +56,14 @@ docker_build:
     - until docker info; do sleep 1; done
   script:
     - echo "start building docker image"
-    - docker build -f Dockerfile -o out -t $DOCKER_IMAGE:latest -t $DOCKER_IMAGE:${CI_PIPELINE_ID} .
+    - docker build -f Dockerfile -o type=tar,dest=out.tar -t $DOCKER_IMAGE:latest -t $DOCKER_IMAGE:${CI_PIPELINE_ID} .
     - ls -la
     - echo "image created successfully"
   dependencies:
     - build
   artifacts:
     paths:
-      - out/
+      - out.tar
   
 
 publish:
