@@ -63,7 +63,7 @@ docker_build:
     - build
   artifacts:
     paths:
-      - docker_image.tar
+      - docker_image/
     expire_in: 1 hour 
   
 
