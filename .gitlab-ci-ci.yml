@@ -58,6 +58,13 @@ docker_build:
     - docker build -f Dockerfile -t $DOCKER_IMAGE:latest -t $DOCKER_IMAGE:${CI_PIPELINE_ID} .
     - ls -la
     - echo "image created successfully"
+    - echo "docker registry login"
+    - echo "$AZURE_CONTAINER_REGISTRY_PASSWORD" | docker login $REGISTRY_SOURCE --username $AZURE_CONTAINER_REGISTRY_USERNAME --password-stdin
+    - echo "pushing image to registry"
+    - ls -la
+    - docker push $DOCKER_IMAGE:latest
+    - docker push $DOCKER_IMAGE:$CI_PIPELINE_ID
+    - echo "image successfully pushed to registry"
   artifacts:
     paths:
       - bin/

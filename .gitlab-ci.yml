@@ -2,7 +2,7 @@
 stages:
   - build
   - docker_build
-  - publish
+#  - publish
 
 workflow:
   rules:
@@ -13,6 +13,6 @@ workflow:
 
 include:
   - local: '/.gitlab-ci-ci.yml'
-  - local: '/.gitlab-ci-cd.yml'
+#  - local: '/.gitlab-ci-cd.yml'
 
 
