@@ -2,7 +2,7 @@
 stages:
   - build
   - docker_build
-#  - publish
+  - publish
 
 workflow:
   rules:
