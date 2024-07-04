@@ -30,7 +30,7 @@ namespace CloudLiquid.Azure
 
         #region Public Methods
 
-        public string GetLiquidBlobContents(bool filesystem, string filename, Cache<string,string> cache)
+        public string GetLiquidBlobContents(bool filesystem, string filename, Cache<string,string> cache, ref Task sync)
         {
             filename += ".liquid";
 
@@ -51,7 +51,7 @@ namespace CloudLiquid.Azure
 
                 if (!string.IsNullOrEmpty(output))
                 {
-                    cache.Store(filename, output, TimeSpan.FromHours(1));
+                        sync = cache.StoreAsync(filename, output, TimeSpan.FromHours(1));
                 }
                 return output;
             }

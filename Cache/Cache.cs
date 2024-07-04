@@ -21,6 +21,11 @@ namespace CloudLiquid.Azure
             cache[key] = new CacheItem<TValue>(value, expiresAfter);
         }
 
+        public Task StoreAsync(TKey key, TValue value, TimeSpan expiresAfter)
+        {
+             return Task.Run(() => Store(key,value,expiresAfter));
+        }
+
         public TValue? Get(TKey key)
 
         {

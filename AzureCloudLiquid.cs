@@ -44,6 +44,7 @@ namespace CloudLiquid.Azure
             string contentBody;
             StreamReader reader;
             Task<string> contentStream;
+            Task? sync = Task.CompletedTask;
 
             logger.LogInformation("CloudLiquid HTTP trigger function processed a request.");
 
@@ -55,10 +56,9 @@ namespace CloudLiquid.Azure
 
             var contentReader = ContentFactory.ContentFactory.GetContentReader(inContentType);
             var contentWriter = ContentFactory.ContentFactory.GetContentWriter(outContentType);
-
             try
             {
-                liquidBlobContents = azureStorageManager.GetLiquidBlobContents(false, req?.Headers.From.FirstOrDefault() ?? String.Empty, cache);
+                liquidBlobContents = azureStorageManager.GetLiquidBlobContents(false, req?.Headers.From.FirstOrDefault() ?? String.Empty, cache,ref sync);
             }
             catch (Exception ex)
             {
@@ -79,32 +79,29 @@ namespace CloudLiquid.Azure
             } 
             catch(Exception ex)
             {
+                await sync;
                 throw new ReadRequestException(ex.Message, Constants.CloudLiquidFunctionName);
             }
 
             DotLiquid.Hash inputHash;
-
-            logger.LogInformation($"Content: {contentBody}");
-
             try
             {
                 inputHash = contentReader.ParseString(contentBody);
             }
             catch (Exception ex)
             {
+                await sync;
                 throw new ParsingException(ex.Message, Constants.CloudLiquidFunctionName);
             }
             
             string output;
-
-            logger.LogInformation(contentBody);
-
             try
             {
                 RunResult result = liquidProcessor.Run(inputHash, liquidBlobContents);
 
                 if (!result.Success)
                 {
+                    await sync;
                     throw new RunTemplateException($"Error while running template: {result.ErrorMessage}", Constants.CloudLiquidFunctionName, result.ErrorAction);
                 }
 
@@ -116,12 +113,14 @@ namespace CloudLiquid.Azure
             }
             catch (Exception ex)
             {
+                await sync;
                 throw new RunTemplateException($"Error while running template: {ex.Message}", Constants.CloudLiquidFunctionName, "RunTemplate");
             }
             
             try
             {
                 var content = contentWriter.CreateResponse(output);
+                await sync;
                 return new ContentResult()
                 {
                     Content = output,
@@ -131,6 +130,7 @@ namespace CloudLiquid.Azure
             }
             catch (Exception ex)
             {
+                await sync;
                 throw new CreateResponseException(ex.Message, "CoudLiquid");
             }
         }

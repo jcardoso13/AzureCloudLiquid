@@ -1,35 +1,38 @@
 version: '3'
 services:
+  local.storage.emulator:
+    image: "mcr.microsoft.com/azure-storage/azurite:latest"
+    command: "azurite --loose --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --location /workspace --debug /workspace/debug.log"
+    container_name: local.storage.emulator
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - 10000:10000
+      - 10001:10001
+      - 10002:10002
+    volumes:
+      - ./azurite:/workspace
+    networks:
+      - aft-backend
 
-    local.storage.emulator:
-        image: "mcr.microsoft.com/azure-storage/azurite:latest"
-        command: "azurite --loose --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --location /workspace --debug /workspace/debug.log"
-        container_name: local.storage.emulator
-        ports:
-          - 10000:10000
-          - 10001:10001
-          - 10002:10002
-        volumes:
-          - ./azurite:/workspace
-        networks:
-          - aft-backend
-
-    local.functions:
-        container_name: local.functions
-        build:
-            context: .
-            dockerfile: Dockerfile
-        ports:
-            - 8080:80
-        environment:
-            # Copy .env variables through to container
-            - AzureWebJobsStorage
-            - ContainerName
-            - StorageAccountConnectionString
-        depends_on:
-            - local.storage.emulator
-        networks:
-          - aft-backend
+  local.functions:
+    container_name: local.functions
+    env_file: ./.env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - 8080:80
+    environment:
+      - AzureWebJobsStorage=${AzureWebJobsStorage}
+      - ContainerName=${ContainerName}
+      - StorageAccountConnectionString=${StorageAccountConnectionString}
+    depends_on:
+      - local.storage.emulator
+    networks:
+      - aft-backend
 networks:
   aft-backend:
     name: aft-backend-network
