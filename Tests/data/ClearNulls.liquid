@@ -1,0 +1,10 @@
+{%capture_json test%}
+{
+    "test":null,
+    "test2":"Success"
+}
+{%endcapture_json%}
+{
+"capture_json":{{test | clear_nulls | json }},
+"input":{{content | clear_nulls | json }}
+}

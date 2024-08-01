@@ -1,0 +1,7 @@
+{%- if content.a or content.b -%}
+{
+    "String":"HarcodedString"
+    "TestReason":"No Comma between Objects thus JSON Error!"
+    "TEST":{{ content | json }}
+}
+{%- endif -%}

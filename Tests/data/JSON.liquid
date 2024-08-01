@@ -1,0 +1,7 @@
+{%- if content.a or content.b -%}
+{
+    "ExampleProperty":"HarcodedString",
+    "TestReason":" Simple JSON test for CloudLiquid",
+    "TestFilters":{{ content | json }}
+}
+{%- endif -%}

@@ -1,0 +1,10 @@
+{% capture_json content %}
+{
+    "test": ["apple", "banana", "cherry"]
+}
+{% endcapture_json %}
+
+{
+    "contains_apple": {{ content.test | liquid_contains: "apple" }},
+    "contains_orange": {{ content.test | liquid_contains: "orange" }}
+}

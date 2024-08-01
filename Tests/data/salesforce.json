@@ -1,0 +1,40 @@
+{
+    "OpportunityRequest":[
+        {
+            "Name":"TEST",
+            "Description":"This is an example Opportunity",
+            "Owner":"João Cardoso",
+            "Quote":[
+                {
+                    "Name":"TEST QUOTE",
+                    "Description":"This is an example Quote",
+                    "Property1": null,
+                    "QuoteLine":[
+                        {
+                            "Name": "TEST QUOTELINE",
+                            "Description":"This is an example Quoteline"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Name":"TEST",
+            "Id":"TEST",
+            "Description":"This is an example Opportunity",
+            "Owner":"João Cardoso",
+            "Quote":[
+                {
+                    "Name":"TEST QUOTE",
+                    "Description":"This is an example Quote",
+                    "QuoteLine":[
+                        {
+                            "Name": "TEST QUOTELINE",
+                            "Description":"This is an example Quoteline"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

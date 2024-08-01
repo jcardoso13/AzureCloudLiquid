@@ -1,0 +1,167 @@
+{% comment %}
+Hello, this is a comment!
+This Liquid tries to show the full capabilities in CloudLiquid.
+https://help.salesforce.com/s/articleView?id=sf.opportunities.htm&type=5 -> Opportunity Help Page
+https://help.salesforce.com/s/articleView?id=sf.quotes_overview.htm&type=5 -> Quote Help Page
+We are going to consider the following Input from a B2B scenario between a client and a CRM. We are using Salesforce as an example for this data transformation
+{
+    "OpportunityRequest":[
+        {
+            "Name":"TEST",
+            "Description":"This is an example Opportunity",
+            "Owner":"João Cardoso",
+            "Quote":[
+                {
+                    "Name":"TEST QUOTE",
+                    "Description":"This is an example Quote",
+                    "QuoteLine":[
+                        {
+                            "Name": "TEST QUOTELINE",
+                            "Description":"This is an example Quoteline"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+What is the goal? The Goal is to transform the following request to hit the Salesforce API. 
+If the Opportunity is new and doesn't have Id, we are going to create a new Opportunity and we can nest all objects
+If the Opportunity has an Id, we have to unnest the object and call each Salesforce Object Individually in an array format up to 200 records at a time.
+Update Records in Salesforce API -> https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobjects_collections_update.htm
+This is an easier example than reality, in real use cases, before doing this transformation, we would also have lookups but we are going to ignore them in this Liquid!
+Example Request to Update Records
+{
+   "allOrNone" : false,
+   "records" : [{
+      "attributes" : {"type" : "Account"},
+      "id" : "001xx000003DGb2AAG",
+      "NumberOfEmployees" : 27000
+   },{
+      "attributes" : {"type" : "Contact"},
+      "id" : "003xx000004TmiQAAS",
+      "Title" : "Lead Engineer"
+   }]
+}
+Create Records in Tree using Salesforce API -> https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_composite_sobject_tree.htm
+{
+"records" :[{
+    "attributes" : {"type" : "Account", "referenceId" : "ref1"},
+    "name" : "SampleAccount",
+    "phone" : "1234567890",
+    "website" : "www.salesforce.com",
+    "numberOfEmployees" : "100",
+    "industry" : "Banking",
+    "Contacts" : {
+      "records" : [{
+         "attributes" : {"type" : "Contact", "referenceId" : "ref2"},
+         "lastname" : "Smith",
+         "title" : "President",
+         "email" : "sample@salesforce.com"
+         },{         
+         "attributes" : {"type" : "Contact", "referenceId" : "ref3"},
+         "lastname" : "Evans",
+         "title" : "Vice President",
+         "email" : "sample@salesforce.com"
+         }]
+      }
+    },{
+    "attributes" : {"type" : "Account", "referenceId" : "ref4"},
+    "name" : "SampleAccount2",
+    "phone" : "1234567890",
+    "website" : "www.salesforce2.com",
+    "numberOfEmployees" : "100",
+    "industry" : "Banking"
+     }]
+}
+
+So the Output goal is the following
+{
+    "CreateOpportunity":{
+            "records" :[{
+                "attributes" : {"type" : "Account", "referenceId" : "ref1"},
+                "name" : "SampleAccount",
+                "phone" : "1234567890",
+                "website" : "www.salesforce.com",
+                "numberOfEmployees" : "100",
+                "industry" : "Banking",
+                "Contacts" : {
+                "records" : [{
+                    "attributes" : {"type" : "Contact", "referenceId" : "ref2"},
+                    "lastname" : "Smith",
+                    "title" : "President",
+                    "email" : "sample@salesforce.com"
+                    },{         
+                    "attributes" : {"type" : "Contact", "referenceId" : "ref3"},
+                    "lastname" : "Evans",
+                    "title" : "Vice President",
+                    "email" : "sample@salesforce.com"
+                    }]
+                }
+                },{
+                "attributes" : {"type" : "Account", "referenceId" : "ref4"},
+                "name" : "SampleAccount2",
+                "phone" : "1234567890",
+                "website" : "www.salesforce2.com",
+                "numberOfEmployees" : "100",
+                "industry" : "Banking"
+                }]
+        },
+            "UpdateOpportunity":{
+                "allOrNone" : false,
+                "records" : [{
+                    "attributes" : {"type" : "Account"},
+                    "id" : "001xx000003DGb2AAG",
+                    "NumberOfEmployees" : 27000
+                },{
+                    "attributes" : {"type" : "Contact"},
+                    "id" : "003xx000004TmiQAAS",
+                    "Title" : "Lead Engineer"
+                }]
+    }
+}
+{%endcomment%}
+    {% assign CreateOpportunity = null | create_list %}
+    {% assign UpdateOpportunity = null | create_list %}
+    {% for item in content.OpportunityRequest %}
+        {%  if item.Id != null %}
+            {% for quote in item.Quote %}
+                {% for quoteline in quote.QuoteLine %}
+                    {% capture_json line %}
+                    {
+                        "attributes" : {"type" : "QuoteLine"},
+                        {{ quoteline | json: "nobrackets" }}
+                    }
+                    {% endcapture_json %}
+                    {% assign UpdateOpportunity = UpdateOpportunity | add_to_list: line %}
+                {% endfor %}
+                {% assign quo = quote | remove_property : "QuoteLine" %}
+                {% capture_json line %}
+                {
+                    "attributes" : {"type" : "Quote"},
+                    {{ quo | json: "nobrackets" }}
+                }
+                {% endcapture_json %}
+                {% assign UpdateOpportunity = UpdateOpportunity | add_to_list: line %}
+            {% endfor %}
+            {% assign opp = item | remove_property: "Quote"%}
+            {% capture_json line %}
+            {
+                    "attributes" : {"type" : "Opportunity"},
+                    {{ opp | json: "nobrackets" }}
+            }
+            {% endcapture_json %}
+            {% assign UpdateOpportunity = UpdateOpportunity | add_to_list: line %}
+        {%  else %}
+            {%assign CreateOpportunity = CreateOpportunity | add_to_list: item %}
+        {% endif %}
+    {% endfor %}
+{
+    "CreateOpportunity":{
+        "records": {{CreateOpportunity | json }}
+    },
+    "UpdateOpportunity":{
+        "allOrNone" : false,
+        "records": {{UpdateOpportunity | json }}
+    }
+}
